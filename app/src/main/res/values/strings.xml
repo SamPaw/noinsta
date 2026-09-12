@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">NoInsta</string>
+    <string name="accessibility_service_label">NoInsta Detection Service</string>
+    <string name="accessibility_service_description">Used to detect when Instagram is opened to help maintain digital discipline.</string>
+    <string name="notification_channel_name">Monitoring Service</string>
+    <string name="notification_channel_description">Ensures the habit control system remains active.</string>
+    <string name="notification_title">NoInsta is Active</string>
+    <string name="notification_content">Monitoring Instagram usage to help you stay focused.</string>
+</resources>

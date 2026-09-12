@@ -2,12 +2,12 @@ package `in`.platesight.noinsta.data.remote
 
 import `in`.platesight.noinsta.data.SecurePreferencesManager
 import `in`.platesight.noinsta.data.remote.model.AuthResponse
-import `in`.platesight.noinsta.data.remote.model.RefreshTokenRequest
 import kotlinx.coroutines.runBlocking
-import okhttp3.OkHttpClient
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.Protocol
 import okhttp3.Request
 import okhttp3.Response
-import okhttp3.Protocol
+import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
@@ -60,12 +60,13 @@ class TokenAuthenticatorTest {
         verify(securePreferencesManager).refreshToken = "new_refresh"
     }
 
-    @Test
-    fun `failed refresh clears state and returns null`() = runBlocking {
+    @Test(timeout = 5000)
+    fun `failed refresh clears state and returns null without hanging`() = runBlocking {
         whenever(securePreferencesManager.refreshToken).thenReturn("old_refresh")
         whenever(securePreferencesManager.accessToken).thenReturn("old_access")
         
-        whenever(apiService.refreshToken(any())).thenReturn(RetrofitResponse.error(401, mock()))
+        val errorBody = "{}".toResponseBody("application/json".toMediaType())
+        whenever(apiService.refreshToken(any())).thenReturn(RetrofitResponse.error(401, errorBody))
 
         val originalRequest = Request.Builder()
             .url("https://example.com")
@@ -83,5 +84,25 @@ class TokenAuthenticatorTest {
 
         assertNull(authenticatedRequest)
         verify(securePreferencesManager).clear()
+    }
+
+    @Test
+    fun `does not attempt refresh if already retried`() = runBlocking {
+        val originalRequest = Request.Builder()
+            .url("https://example.com")
+            .header("Authorization", "Bearer old_access")
+            .header("X-Retry-Count", "1")
+            .build()
+        
+        val response = Response.Builder()
+            .request(originalRequest)
+            .protocol(Protocol.HTTP_1_1)
+            .code(401)
+            .message("Unauthorized")
+            .build()
+
+        val authenticatedRequest = authenticator.authenticate(null, response)
+
+        assertNull(authenticatedRequest)
     }
 }

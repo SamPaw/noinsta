@@ -1,6 +1,6 @@
 package `in`.platesight.noinsta.di
 
-import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
+import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -13,7 +13,16 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
+import javax.inject.Qualifier
 import javax.inject.Singleton
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class AuthClient
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class RefreshClient
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -30,6 +39,7 @@ object NetworkModule {
 
     @Provides
     @Singleton
+    @AuthClient
     fun provideOkHttpClient(
         securePreferencesManager: SecurePreferencesManager,
         tokenAuthenticator: TokenAuthenticator
@@ -53,7 +63,33 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideApiService(okHttpClient: OkHttpClient, json: Json): ApiService {
+    @RefreshClient
+    fun provideRefreshOkHttpClient(): OkHttpClient {
+        val loggingInterceptor = HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        }
+
+        return OkHttpClient.Builder()
+            .addInterceptor(loggingInterceptor)
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideApiService(@AuthClient okHttpClient: OkHttpClient, json: Json): ApiService {
+        val contentType = "application/json".toMediaType()
+        return Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .client(okHttpClient)
+            .addConverterFactory(json.asConverterFactory(contentType))
+            .build()
+            .create(ApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    @RefreshClient
+    fun provideRefreshApiService(@RefreshClient okHttpClient: OkHttpClient, json: Json): ApiService {
         val contentType = "application/json".toMediaType()
         return Retrofit.Builder()
             .baseUrl(BASE_URL)

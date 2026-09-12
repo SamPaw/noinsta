@@ -2,6 +2,7 @@ package `in`.platesight.noinsta.data.remote
 
 import `in`.platesight.noinsta.data.SecurePreferencesManager
 import `in`.platesight.noinsta.data.remote.model.RefreshTokenRequest
+import `in`.platesight.noinsta.di.RefreshClient
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -14,12 +15,17 @@ import javax.inject.Provider
 
 class TokenAuthenticator @Inject constructor(
     private val securePreferencesManager: SecurePreferencesManager,
-    private val apiServiceProvider: Provider<ApiService>
+    @RefreshClient private val apiServiceProvider: Provider<ApiService>
 ) : Authenticator {
 
     private val mutex = Mutex()
 
     override fun authenticate(route: Route?, response: Response): Request? {
+        // Stop if we've already tried to refresh for this request
+        if (response.request.header(HEADER_RETRY_COUNT) != null) {
+            return null
+        }
+
         val refreshToken = securePreferencesManager.refreshToken ?: return null
 
         return runBlocking {
@@ -28,14 +34,15 @@ class TokenAuthenticator @Inject constructor(
                 val currentToken = securePreferencesManager.accessToken
                 val requestToken = response.request.header("Authorization")?.removePrefix("Bearer ")
 
-                if (currentToken != requestToken) {
+                if (currentToken != requestToken && currentToken != null) {
                     // Token was already refreshed, retry with the new token
                     return@runBlocking response.request.newBuilder()
                         .header("Authorization", "Bearer $currentToken")
+                        .header(HEADER_RETRY_COUNT, "1")
                         .build()
                 }
 
-                // Call refresh API
+                // Call refresh API using the unauthenticated client
                 val apiService = apiServiceProvider.get()
                 val refreshResponse = try {
                     apiService.refreshToken(RefreshTokenRequest(refreshToken))
@@ -52,14 +59,22 @@ class TokenAuthenticator @Inject constructor(
                         }
                         return@runBlocking response.request.newBuilder()
                             .header("Authorization", "Bearer ${authResponse.accessToken}")
+                            .header(HEADER_RETRY_COUNT, "1")
                             .build()
                     }
+                } else if (refreshResponse?.code() == 401) {
+                    // Refresh token invalid/expired
+                    securePreferencesManager.clear()
+                    return@runBlocking null
                 }
 
-                // If refresh fails, clear tokens and let the user re-pair
-                securePreferencesManager.clear()
+                // For other errors, don't clear tokens, just stop retrying for this request
                 null
             }
         }
+    }
+
+    companion object {
+        private const val HEADER_RETRY_COUNT = "X-Retry-Count"
     }
 }

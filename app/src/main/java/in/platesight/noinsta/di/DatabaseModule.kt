@@ -2,6 +2,7 @@ package `in`.platesight.noinsta.di
 
 import android.content.Context
 import androidx.room.Room
+import androidx.work.WorkManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -28,5 +29,11 @@ object DatabaseModule {
     @Provides
     fun providePendingEventDao(database: NoInstaDatabase): PendingEventDao {
         return database.pendingEventDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideWorkManager(@ApplicationContext context: Context): WorkManager {
+        return WorkManager.getInstance(context)
     }
 }
