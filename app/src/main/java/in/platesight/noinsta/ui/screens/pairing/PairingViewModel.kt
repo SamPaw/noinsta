@@ -57,16 +57,28 @@ class PairingViewModel @Inject constructor(
 
                     onSuccess()
                 } else {
+                    val errorMessage = when (response.code()) {
+                        403 -> "Network firewall blocked request (HTTP 403). Please disconnect from Wi-Fi (e.g. campus Wi-Fi) and try on Mobile Data or VPN."
+                        404 -> "Pairing code expired or invalid (HTTP 404)."
+                        400 -> "Invalid pairing request (HTTP 400)."
+                        else -> "Failed to claim pairing code: ${response.code()}"
+                    }
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        error = "Failed to claim pairing code: ${response.code()}"
+                        error = errorMessage
                     )
                 }
             } catch (e: Exception) {
                 Timber.e(e, "Error claiming pairing")
+                val errorMessage = if (e.message?.contains("CertPathValidatorException") == true ||
+                                       e.message?.contains("Trust anchor") == true) {
+                    "SSL certificate blocked by network. Please use Mobile Data or a VPN."
+                } else {
+                    e.message ?: "Unknown error"
+                }
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
-                    error = e.message ?: "Unknown error"
+                    error = errorMessage
                 )
             }
         }
