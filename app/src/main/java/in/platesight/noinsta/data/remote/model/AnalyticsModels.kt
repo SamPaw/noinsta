@@ -11,7 +11,9 @@ data class AnalyticsSummaryDto(
     @SerialName("total_opens_all_time") val totalOpensAllTime: Int = 0,
     @SerialName("total_sessions_all_time") val totalSessionsAllTime: Int = 0,
     @SerialName("total_interventions_all_time") val totalInterventionsAllTime: Int = 0,
-    @SerialName("last_opened_at") val lastOpenedAt: String? = null
+    @SerialName("last_opened_at") val lastOpenedAt: String? = null,
+    @SerialName("cooldown_seconds") val cooldownSeconds: Int = 300,
+    @SerialName("cooldown_remaining_seconds") val cooldownRemainingSeconds: Int = 0
 )
 
 @Serializable
@@ -52,4 +54,14 @@ data class AnalyticsResponse(
     @SerialName("daily_breakdown") val dailyBreakdown: List<DailyBreakdownDto> = emptyList(),
     @SerialName("recent_events") val recentEvents: List<EventLogItemDto> = emptyList(),
     @SerialName("recent_interventions") val recentInterventions: List<InterventionLogItemDto> = emptyList()
+)
+
+@Serializable
+data class UserSettingsDto(
+    @SerialName("cooldown_seconds") val cooldownSeconds: Int = 300
+)
+
+@Serializable
+data class UpdateUserSettingsRequest(
+    @SerialName("cooldown_seconds") val cooldownSeconds: Int
 )

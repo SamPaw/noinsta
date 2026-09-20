@@ -43,6 +43,10 @@ class SecurePreferencesManager @Inject constructor(
         get() = securePrefs.getBoolean(KEY_IS_ONBOARDED, false)
         set(value) = securePrefs.edit().putBoolean(KEY_IS_ONBOARDED, value).apply()
 
+    var cooldownSeconds: Int
+        get() = securePrefs.getInt(KEY_COOLDOWN_SECONDS, 300)
+        set(value) = securePrefs.edit().putInt(KEY_COOLDOWN_SECONDS, value).apply()
+
     fun clear() {
         securePrefs.edit().clear().apply()
     }
@@ -53,5 +57,6 @@ class SecurePreferencesManager @Inject constructor(
         private const val KEY_REFRESH_TOKEN = "refresh_token"
         private const val KEY_USER_ID = "user_id"
         private const val KEY_IS_ONBOARDED = "is_onboarded"
+        private const val KEY_COOLDOWN_SECONDS = "cooldown_seconds"
     }
 }

@@ -138,6 +138,35 @@ fun DashboardScreen(
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.outline
                         )
+                        Spacer(modifier = Modifier.height(10.dp))
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = "⏱️ Cooldown: ${if (uiState.cooldownSeconds == 0) "Disabled" else "${uiState.cooldownSeconds / 60}m"}",
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.Medium
+                            )
+                            if (uiState.cooldownRemainingSeconds > 0) {
+                                Text(
+                                    text = "⏳ Active (${formatDuration(uiState.cooldownRemainingSeconds)} left)",
+                                    color = Color(0xFFF59E0B),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            } else {
+                                Text(
+                                    text = "🟢 Ready to Intervene",
+                                    color = Color(0xFF10B981),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -227,7 +256,7 @@ fun DashboardScreen(
                                 Text("Time", fontWeight = FontWeight.SemiBold, fontSize = 12.sp, modifier = Modifier.weight(1.2f))
                                 Text("Interv.", fontWeight = FontWeight.SemiBold, fontSize = 12.sp, modifier = Modifier.weight(1f))
                             }
-                            Divider(modifier = Modifier.padding(vertical = 8.dp))
+                            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
                             uiState.dailyBreakdown.forEach { item ->
                                 Row(
                                     modifier = Modifier

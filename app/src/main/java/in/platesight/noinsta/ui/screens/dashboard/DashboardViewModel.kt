@@ -55,6 +55,8 @@ class DashboardViewModel @Inject constructor(
                             totalOpensAllTime = body.summary.totalOpensAllTime,
                             totalSessionsAllTime = body.summary.totalSessionsAllTime,
                             totalInterventionsAllTime = body.summary.totalInterventionsAllTime,
+                            cooldownSeconds = body.summary.cooldownSeconds,
+                            cooldownRemainingSeconds = body.summary.cooldownRemainingSeconds,
                             dailyBreakdown = body.dailyBreakdown,
                             recentEvents = body.recentEvents,
                             recentInterventions = body.recentInterventions
@@ -92,6 +94,8 @@ data class DashboardUiState(
     val totalOpensAllTime: Int = 0,
     val totalSessionsAllTime: Int = 0,
     val totalInterventionsAllTime: Int = 0,
+    val cooldownSeconds: Int = 300,
+    val cooldownRemainingSeconds: Int = 0,
     val dailyBreakdown: List<DailyBreakdownDto> = emptyList(),
     val recentEvents: List<EventLogItemDto> = emptyList(),
     val recentInterventions: List<InterventionLogItemDto> = emptyList()
