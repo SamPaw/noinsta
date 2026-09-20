@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 
 private val COOLDOWN_PRESETS = listOf(
+    -1 to "Mute Laptop (Track Only - No Interventions)",
     0 to "Disabled (0m - Intervene every time)",
     60 to "1 minute",
     120 to "2 minutes",
@@ -28,6 +29,7 @@ private val COOLDOWN_PRESETS = listOf(
 
 private fun formatCooldownDisplay(seconds: Int): String {
     return when (seconds) {
+        -1 -> "Muted (Track Only)"
         0 -> "Disabled (0m)"
         else -> "${seconds / 60} min"
     }

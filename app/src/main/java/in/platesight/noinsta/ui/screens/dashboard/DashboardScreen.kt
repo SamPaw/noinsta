@@ -146,12 +146,24 @@ fun DashboardScreen(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             modifier = Modifier.fillMaxWidth()
                         ) {
+                            val cooldownLabel = when (uiState.cooldownSeconds) {
+                                -1 -> "Muted (Track Only)"
+                                0 -> "Disabled"
+                                else -> "${uiState.cooldownSeconds / 60}m"
+                            }
                             Text(
-                                text = "⏱️ Cooldown: ${if (uiState.cooldownSeconds == 0) "Disabled" else "${uiState.cooldownSeconds / 60}m"}",
+                                text = "⏱️ Cooldown: $cooldownLabel",
                                 style = MaterialTheme.typography.bodySmall,
                                 fontWeight = FontWeight.Medium
                             )
-                            if (uiState.cooldownRemainingSeconds > 0) {
+                            if (uiState.cooldownSeconds == -1) {
+                                Text(
+                                    text = "🔇 Laptop Muted",
+                                    color = MaterialTheme.colorScheme.outline,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            } else if (uiState.cooldownRemainingSeconds > 0) {
                                 Text(
                                     text = "⏳ Active (${formatDuration(uiState.cooldownRemainingSeconds)} left)",
                                     color = Color(0xFFF59E0B),
