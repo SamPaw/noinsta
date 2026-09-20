@@ -1,5 +1,6 @@
 package `in`.platesight.noinsta.data.remote
 
+import `in`.platesight.noinsta.data.remote.model.AnalyticsResponse
 import `in`.platesight.noinsta.data.remote.model.AppEventRequest
 import `in`.platesight.noinsta.data.remote.model.AppEventResponse
 import `in`.platesight.noinsta.data.remote.model.AuthResponse
@@ -27,4 +28,7 @@ interface ApiService {
 
     @GET("api/v1/health")
     suspend fun checkHealth(): Response<HealthResponse>
+
+    @GET("api/v1/analytics")
+    suspend fun getAnalytics(): Response<AnalyticsResponse>
 }
