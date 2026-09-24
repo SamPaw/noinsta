@@ -1,5 +1,6 @@
 package `in`.platesight.noinsta.data.remote
 
+import `in`.platesight.noinsta.data.remote.model.AnalyticsResponse
 import `in`.platesight.noinsta.data.remote.model.AppEventRequest
 import `in`.platesight.noinsta.data.remote.model.AppEventResponse
 import `in`.platesight.noinsta.data.remote.model.AuthResponse
@@ -7,10 +8,13 @@ import `in`.platesight.noinsta.data.remote.model.HealthResponse
 import `in`.platesight.noinsta.data.remote.model.PairingClaimRequest
 import `in`.platesight.noinsta.data.remote.model.PairingClaimResponse
 import `in`.platesight.noinsta.data.remote.model.RefreshTokenRequest
+import `in`.platesight.noinsta.data.remote.model.UpdateUserSettingsRequest
+import `in`.platesight.noinsta.data.remote.model.UserSettingsDto
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
 
 interface ApiService {
     @POST("api/v1/pairing/claim")
@@ -27,4 +31,13 @@ interface ApiService {
 
     @GET("api/v1/health")
     suspend fun checkHealth(): Response<HealthResponse>
+
+    @GET("api/v1/analytics")
+    suspend fun getAnalytics(): Response<AnalyticsResponse>
+
+    @GET("api/v1/settings")
+    suspend fun getSettings(): Response<UserSettingsDto>
+
+    @PUT("api/v1/settings")
+    suspend fun updateSettings(@Body request: UpdateUserSettingsRequest): Response<UserSettingsDto>
 }
